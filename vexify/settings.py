@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     # myApps
     "accounts",
+    'catalog',
 ]
 
 MIDDLEWARE = [
@@ -118,6 +119,14 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
+
+#email backend setup
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = "your_email@gmail.com"
+# EMAIL_HOST_PASSWORD = "your_app_password"  # Not your Gmail password!
 
 
 # Static files (CSS, JavaScript, Images)

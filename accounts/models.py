@@ -62,4 +62,4 @@ class PasswordResetOTP(models.Model):
     is_used = models.BooleanField(default=False)
 
     def is_expired(self):
-        return timezone.now() > self.created_at + datetime.timedelta(minutes=1)
+        return timezone.now() > self.created_at + datetime.timedelta(minutes=2)

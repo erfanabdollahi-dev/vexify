@@ -44,7 +44,7 @@ class SendOTPView(APIView):
         except User.DoesNotExist:
             return Response({"message": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        otp = f"{random.randint(1000, 9999)}"
+        otp = f"{random.randint(10000, 99999)}"
 
         PasswordResetOTP.objects.create(user=user,otp=otp)
 
@@ -54,7 +54,7 @@ class SendOTPView(APIView):
         # send_mail(
         #     "Your Password Reset OTP",
         #     f"Your OTP is {otp}. It expires in 1 minute.",
-        #     "no-reply@yourapp.com",
+        #     "erfanabdollahi.dev.com",
         #     [email],
         #     fail_silently=False
         # )
