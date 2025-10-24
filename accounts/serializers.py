@@ -105,3 +105,6 @@ class VerifyOTPSerializer(serializers.Serializer):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Passwords didn't match."})
         return attrs
+
+
+

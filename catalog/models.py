@@ -17,16 +17,18 @@ class Artist(models.Model):
     name = models.CharField(max_length=80)
     bio = models.TextField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to='artists/', blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
 
 class Album(models.Model):
     name = models.CharField(max_length=80)
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name='albums')
     categories = models.ManyToManyField(Category, related_name='albums', blank=True)
     cover = models.ImageField(upload_to='albums/')
     release_date = models.DateField()
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -35,13 +37,14 @@ class Album(models.Model):
 
 class Song(models.Model):
     name = models.CharField(max_length=100)
-    artist = models.ForeignKey(Artist, related_name='songs', on_delete=models.CASCADE)
+    artist = models.ManyToManyField(Artist, related_name='songs')
     album = models.ForeignKey(Album, related_name='songs', on_delete=models.SET_NULL, blank=True, null=True)
     cover = models.ImageField(upload_to='songs/', null=True, blank=True)
     audio_file = models.FileField(upload_to='audio_file/')
     duration = models.DurationField(blank=True, null=True)
     popularity = models.PositiveIntegerField(default=0)
     release_date = models.DateField()
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
