@@ -14,7 +14,7 @@ class Category(models.Model):
 
 
 class Artist(models.Model):
-    name = models.CharField(max_length=80)
+    name = models.CharField(max_length=80, unique=True)
     bio = models.TextField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to='artists/', blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -41,6 +41,7 @@ class Song(models.Model):
     album = models.ForeignKey(Album, related_name='songs', on_delete=models.SET_NULL, blank=True, null=True)
     cover = models.ImageField(upload_to='songs/', null=True, blank=True)
     audio_file = models.FileField(upload_to='audio_file/')
+    categories = models.ManyToManyField(Category, related_name='songs', blank=True)
     duration = models.DurationField(blank=True, null=True)
     popularity = models.PositiveIntegerField(default=0)
     release_date = models.DateField()
@@ -59,7 +60,7 @@ class Playlist(models.Model):
 
 class Favorite(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    songs = models.ManyToManyField(Song, related_name='favorites')
+    songs = models.ManyToManyField(Song, related_name='favorites', blank=True)
     albums = models.ManyToManyField(Album, related_name='favorited_by', blank=True)
     playlists = models.ManyToManyField(Playlist, related_name='favorited_by', blank=True)
     artists = models.ManyToManyField(Artist, related_name='favorited_by', blank=True)

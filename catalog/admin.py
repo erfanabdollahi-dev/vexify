@@ -5,7 +5,7 @@ from .models import Artist, Album, Playlist, Favorite, Song, Category
 class SongInline(admin.TabularInline):
     model = Song
     extra = 1  # how many empty forms to show
-    fields = ['name', 'artist', 'cover', 'audio_file', 'duration', 'popularity']
+    fields = ['name', 'artist', 'cover', 'audio_file', 'duration', 'popularity','categories']
 
 class AlbumAdmin(admin.ModelAdmin):
     list_display = ['name', 'artist', 'release_date']

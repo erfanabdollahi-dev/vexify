@@ -1,118 +1,100 @@
 from rest_framework import serializers
 from accounts.serializers import UserSerializer
 from .models import Category, Artist, Song, Album, Playlist, Favorite
+# Lightweight Song for artist page
+class SongLightSerializer(serializers.ModelSerializer):
+    categories = serializers.StringRelatedField(many=True)
+    class Meta:
+        model = Song
+        fields = ['id', 'name', 'duration', 'popularity','cover','categories']
+
+# Lightweight Album for artist page
+class AlbumLightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Album
+        fields = ['id', 'name', 'cover']
+
+
+class ArtistLightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artist
+        fields = ['id', 'name', 'image','bio']
+
+class PlaylistLightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Playlist
+        fields = ['id', 'name', 'cover']
+
 
 # ---------- CATEGORY ----------
 class CategorySerializer(serializers.ModelSerializer):
-    cover_url = serializers.SerializerMethodField()
-
     class Meta:
         model = Category
-        fields = ['id', 'name', 'description', 'cover_url']
+        fields = ['id', 'name', 'description', 'cover']
 
-    def get_cover_url(self, obj):
-        request = self.context.get('request')
-        if request and obj.cover:
-            return request.build_absolute_uri(obj.cover.url)
-        elif obj.cover:
-            return obj.cover.url
-        return None
 
 # ---------- ARTIST ----------
 class ArtistSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
-    songs = serializers.SerializerMethodField()
+    top_songs = serializers.SerializerMethodField()
     albums = serializers.SerializerMethodField()
 
     class Meta:
         model = Artist
-        fields = ['id', 'name', 'bio', 'image_url', 'songs', 'albums']
+        fields = ['id', 'name', 'bio','image', 'top_songs', 'albums']
 
-    def get_image_url(self, obj):
-        request = self.context.get('request')
-        if request and obj.image:
-            return request.build_absolute_uri(obj.image.url)
-        elif obj.image:
-            return obj.image.url
-        return None
 
-    def get_songs(self, obj):
-        from .serializers import SongSerializer
-        songs = obj.songs.all()
-        return SongSerializer(songs,context=self.context).data
+    def get_top_songs(self, obj):
+        songs = obj.songs.order_by('-popularity')
+        return SongLightSerializer(songs, many=True, context=self.context).data
+
+    def get_albums(self, obj):
+        albums = obj.albums.all()
+        return AlbumLightSerializer(albums, many=True, context=self.context).data
+
+
 
 
 # ---------- ALBUM ----------
 class AlbumSerializer(serializers.ModelSerializer):
-    cover_url = serializers.SerializerMethodField()
-    categories = CategorySerializer(many=True, read_only=True)
+    categories = serializers.StringRelatedField(many=True,read_only=True)
     songs = serializers.SerializerMethodField()
-    artist = ArtistSerializer(read_only=True)
+    artist = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Album
-        fields = ['id', 'name', 'artist', 'categories', 'songs', 'cover_url', 'release_date']
-
-    def get_cover_url(self, obj):
-        request = self.context.get('request')
-        if request and obj.cover:
-            return request.build_absolute_uri(obj.cover.url)
-        elif obj.cover:
-            return obj.cover.url
-        return None
+        fields = ['id', 'name', 'artist', 'categories', 'songs', 'cover', 'release_date']
 
     def get_songs(self, obj):
-        from .serializers import SongSerializer
-        songs = obj.songs.all()
-        return SongSerializer(songs,context=self.context).data
+        from .serializers import SongLightSerializer
+        songs = obj.songs.all().order_by('-popularity')
+        return SongLightSerializer(songs,many=True,context=self.context).data
+
+
 
 # ---------- SONG ----------
 class SongSerializer(serializers.ModelSerializer):
-    cover_url = serializers.SerializerMethodField()
-    audio_file_url = serializers.SerializerMethodField()
-    artist = ArtistSerializer(many=True, read_only=True)
-    album = AlbumSerializer(read_only=True, required=False)
+    artist = serializers.PrimaryKeyRelatedField(queryset=Artist.objects.all(), many=True)
+    album = serializers.PrimaryKeyRelatedField(queryset=Album.objects.all(), required=False, allow_null=True)
+    categories = serializers.StringRelatedField(many=True, required=False, allow_null=True,read_only=True)
 
     class Meta:
         model = Song
         fields = [
-            'id', 'name', 'artist', 'album', 'duration', 'popularity',
-            'cover_url', 'audio_file_url', 'release_date'
+            'id', 'name', 'artist', 'album', 'duration', 'popularity','categories',
+            'cover', 'audio_file', 'release_date','created_date'
         ]
 
-    def get_audio_file_url(self, obj):
-        request = self.context.get('request')
-        if request and obj.audio_file:
-            return request.build_absolute_uri(obj.audio_file.url)
-        elif obj.audio_file:
-            return obj.audio_file.url
-        return None
-
-    def get_cover_url(self, obj):
-        request = self.context.get('request')
-        if request and obj.cover:
-            return request.build_absolute_uri(obj.cover.url)
-        elif obj.cover:
-            return obj.cover.url
-        return None
 
 # ---------- PLAYLIST ----------
 class PlaylistSerializer(serializers.ModelSerializer):
-    cover_url = serializers.SerializerMethodField()
     user = UserSerializer(read_only=True)
     songs = SongSerializer(many=True, read_only=True)
 
     class Meta:
         model = Playlist
-        fields = ['id', 'name', 'user', 'songs', 'cover_url', 'created_at']
+        fields = ['id', 'name', 'user', 'songs', 'cover', 'created_at']
 
-    def get_cover_url(self, obj):
-        request = self.context.get('request')
-        if request and obj.cover:
-            return request.build_absolute_uri(obj.cover.url)
-        elif obj.cover:
-            return obj.cover.url
-        return None
+
 
 # ---------- FAVORITE ----------
 class FavoriteSerializer(serializers.ModelSerializer):
